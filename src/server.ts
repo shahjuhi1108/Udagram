@@ -51,7 +51,7 @@ import * as fs from 'fs';
 
     const path = await filterImageFromURL(url)
 
-    res.sendFile(path)
+    res.status(200).sendFile(path)
 
     // Delete file if exists.
     fs.stat(path, function (err, stats) {
