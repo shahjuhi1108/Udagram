@@ -1,6 +1,8 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import * as nodeURL from "url";
+import * as fs from 'fs';
 
 (async () => {
 
@@ -35,6 +37,35 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   // Displays a simple message to the user
   app.get( "/", async ( req, res ) => {
     res.send("try GET /filteredimage?image_url={{}}")
+  } );
+
+  app.get("/filteredimage", async ( req, res ) => {
+    
+    let url = req.query.image_url
+    const parsedURL = nodeURL.parse(url)
+
+    if(!parsedURL.host) {
+      return res.status(400)
+              .send(`URL is not valid.`);
+    }
+
+    const path = await filterImageFromURL(url)
+
+    res.sendFile(path)
+
+    // Delete file if exists.
+    fs.stat(path, function (err, stats) {
+   
+      if (err) {
+          return console.error(err);
+      }
+   
+      fs.unlink(path,function(err){
+           if(err) return console.log(err);
+           console.log(path + ' deleted successfully');
+      });  
+   });
+
   } );
   
 
